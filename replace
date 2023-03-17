@@ -1,0 +1,48 @@
+import re
+import sys
+from pathlib import Path
+
+# Function to replace old_pattern with new_pattern in file contents
+def replace_file_contents(file_path, old_pattern, new_pattern):
+    with file_path.open('r') as file: file_contents = file.read() # Read file contents
+    file_contents = re.sub(old_pattern, new_pattern, file_contents) # Replace old pattern with new pattern
+    with file_path.open('w') as file: file.write(file_contents) # Write updated contents back to file
+
+# Function to recursively replace old_pattern with new_pattern in a directory
+def replace_in_dir(dir_path, old_pattern, new_pattern):
+    # Loop over all files and subdirectories under dir_path
+    for path in dir_path.glob('**/*'):
+        # If the path is a file
+        if path.is_file():
+            replace_file_contents(path, old_pattern, new_pattern) # Replace old pattern with new pattern in file contents
+            new_name = re.sub(old_pattern, new_pattern, path.name) # Replace old pattern with new pattern in file name
+
+            # If file name was changed
+            if new_name != path.name:
+                new_path = path.with_name(new_name) # Create a new Path object with the updated file name
+                path.rename(new_path) # Rename the file
+
+# Function to replace old_pattern with new_pattern in a file or directory
+def replace_in_path(path, old_pattern, new_pattern):
+    path = Path(path)
+
+    # If path is a directory
+    if path.is_dir(): 
+        replace_in_dir(path, old_pattern, new_pattern) # Recursively replace old pattern with new pattern in directory
+    else:
+        replace_file_contents(path, old_pattern, new_pattern) # Replace old pattern with new pattern in file contents
+        new_name = re.sub(old_pattern, new_pattern, path.name) # Replace old pattern with new pattern in file name
+
+        # If file name was changed
+        if new_name != path.name:
+            new_path = path.with_name(new_name) # Create a new Path object with the updated file name
+            path.rename(new_path) # Rename the file
+
+# Check command line arguments and call replace_in_path function
+if len(sys.argv) != 4:
+    print("Usage: python replace.py path oldpattern newpattern")
+else:
+    path = sys.argv[1]
+    old_pattern = sys.argv[2]
+    new_pattern = sys.argv[3]
+    replace_in_path(path, old_pattern, new_pattern)
