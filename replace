@@ -25,6 +25,11 @@ def replace_in_dir(dir_path, old_pattern, new_pattern):
 # Function to replace old_pattern with new_pattern in a file or directory
 def replace_in_path(path, old_pattern, new_pattern):
     path = Path(path)
+    
+    # If path doesn't exist, presents an error message and ends script
+    if not path.exists():
+        print("Error: Invalid Path- path does not exist")
+        sys.exit(1)
 
     # If path is a directory
     if path.is_dir(): 
